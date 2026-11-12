@@ -54,7 +54,8 @@ const Botao = ({
           borderRadius: tema.raios.medio,
           paddingHorizontal: tema.espacamento.lg,
           // Retorno visual ao tocar sem animação: só muda a opacidade.
-          opacity: inativo ? 0.55 : pressed ? 0.8 : 1,
+          // Carregando mantém a cor cheia para o indicador continuar bem visível.
+          opacity: desabilitado ? 0.55 : pressed ? 0.8 : 1,
         },
       ]}
     >
