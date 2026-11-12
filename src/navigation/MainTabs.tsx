@@ -18,7 +18,7 @@ type NomeIcone = keyof typeof MaterialCommunityIcons.glyphMap;
 const icones: Record<keyof MainTabsParamList, [NomeIcone, NomeIcone]> = {
   Inicio: ['home-outline', 'home'],
   Lugares: ['map-marker-outline', 'map-marker'],
-  Estacoes: ['elevator-passenger-outline', 'elevator-passenger'],
+  Estacoes: ['subway-variant', 'subway-variant'],
   Contribuicoes: ['account-heart-outline', 'account-heart'],
 };
 
@@ -55,7 +55,14 @@ const MainTabs = () => {
         tabBarActiveTintColor: tema.cores.primaria,
         tabBarInactiveTintColor: tema.cores.textoSecundario,
         tabBarLabelStyle: { fontFamily: tema.familias.negrito, fontSize: 12 },
-        headerTitleStyle: { fontFamily: tema.familias.negrito },
+        tabBarStyle: {
+          backgroundColor: tema.cores.superficie,
+          borderTopColor: tema.cores.superficieAlternativa,
+        },
+        // Cabeçalho da mesma cor do fundo e sem sombra: a tela parece uma peça só.
+        headerStyle: { backgroundColor: tema.cores.fundo },
+        headerShadowVisible: false,
+        headerTitleStyle: { fontFamily: tema.familias.negrito, fontSize: 20 },
         headerRight: () => <BotaoPerfil />,
         animation: tema.animacoes ? 'fade' : 'none',
       })}

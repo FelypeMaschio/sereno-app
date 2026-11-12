@@ -23,6 +23,8 @@ const AppStack = () => {
       screenOptions={{
         // Modo baixo estímulo: troca de tela instantânea, sem deslizar.
         animation: tema.animacoes ? 'default' : 'none',
+        headerStyle: { backgroundColor: tema.cores.fundo },
+        headerShadowVisible: false,
         headerTitleStyle: { fontFamily: tema.familias.negrito },
         headerTintColor: tema.cores.primaria,
       }}

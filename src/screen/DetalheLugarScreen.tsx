@@ -1,6 +1,7 @@
 import Botao from '../components/Botao';
+import CabecalhoSecao from '../components/CabecalhoSecao';
+import EmConstrucao from '../components/EmConstrucao';
 import Tela from '../components/Tela';
-import Texto from '../components/Texto';
 import { AppScreenProps } from '../navigation/types';
 
 // Provisória: detalhe, avaliações, insight e previsão chegam nas Etapas 6 e 9.
@@ -9,7 +10,8 @@ const DetalheLugarScreen = ({ navigation, route }: AppScreenProps<'DetalheLugar'
 
   return (
     <Tela>
-      <Texto secundario>Detalhe do lugar {localId}.</Texto>
+      <CabecalhoSecao icone="map-marker-outline" titulo={`Lugar #${localId}`} />
+      <EmConstrucao texto="Índice de calma, previsão por horário e avaliações chegam em breve." />
       <Botao
         titulo="Avaliar este lugar"
         icone="star-outline"
