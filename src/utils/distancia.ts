@@ -26,7 +26,16 @@ export const formatarDistancia = (km: number): string =>
     ? `a ${Math.round((km * 1000) / 10) * 10} m`
     : `a ${km.toLocaleString('pt-BR', { maximumFractionDigits: 1 })} km`;
 
-/** Itens que têm coordenadas válidas (na API .NET elas são opcionais). */
+/**
+ * Itens com coordenadas válidas. Na API .NET elas são opcionais, e um valor de teste
+ * (ex.: 90, 180) daria distâncias absurdas: aceitamos só pontos dentro do Brasil.
+ */
 export const temCoordenadas = <T extends { latitude?: number | null; longitude?: number | null }>(
   item: T,
-): item is T & Coordenada => item.latitude != null && item.longitude != null;
+): item is T & Coordenada =>
+  item.latitude != null &&
+  item.longitude != null &&
+  item.latitude >= -34 &&
+  item.latitude <= 6 &&
+  item.longitude >= -74 &&
+  item.longitude <= -28;
