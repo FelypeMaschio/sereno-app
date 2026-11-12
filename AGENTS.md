@@ -1,41 +1,44 @@
-This is an Expo/React Native mobile application. Prioritize mobile-first patterns, performance, and cross-platform compatibility.
+Este é o app mobile do **Sereno** (Expo + React Native + TypeScript), projeto da Global Solution FIAP 2026/2 da turma 2TDSPI.
 
-## Expo has changed — do not trust your training data
+## Versões
 
-Expo ships breaking changes every SDK release. APIs you remember are likely renamed, moved, or removed. Before writing any code that touches an Expo, EAS, or React Native API:
+- Expo SDK 57 (React Native 0.86, React 19.2). Consulte sempre a documentação da versão certa: https://docs.expo.dev/versions/v57.0.0/
+- Instale pacotes com `npx expo install <pacote>`, que escolhe a versão compatível com o SDK.
 
-1. Read the major version of the `expo` package in `package.json`.
-2. Fetch the matching versioned docs: `https://docs.expo.dev/versions/v<major>.0.0/`
-3. For anything else, fetch https://docs.expo.dev/llms.txt — an index of all Expo docs with corrections to common LLM misconceptions. Follow its links to the specific page you need; never answer from memory.
+## Navegação
 
-## Commands
+- **React Navigation** (`@react-navigation/native`, `native-stack` e `bottom-tabs`).
+- **Não usar Expo Router.**
+- A proteção de rotas é feita no `RootNavigator`: sem token, só existe o `AuthStack`.
 
-Use `bunx` instead of `npx` if the project uses bun (`bun.lock` present).
+## Arquitetura (camadas)
 
-```bash
-npx expo install <package>  # ALWAYS use instead of npm/yarn/pnpm/bun add — resolves SDK-compatible versions
-npx expo start              # start the dev server
-npx expo lint               # lint
-npx tsc --noEmit            # typecheck
-npx expo-doctor             # diagnose dependency and config issues
-npx expo install --fix      # fix incompatible package versions
+```
+src/
+  model/        → tipos e schemas de validação
+  control/      → hooks useXxxControl (estado e regras de cada tela)
+  repository/   → acesso a dados: remote/ (Axios) e local/ (SecureStore)
+  screen/       → telas
+  components/   → componentes reutilizáveis
+  context/      → Contexts (autenticação e tema)
+  navigation/   → navigators e tipos das rotas
+  theme/        → cores, fontes e espaçamentos
+  utils/        → funções auxiliares
 ```
 
-Run lint and typecheck before declaring any task done.
+Fluxo: `screen` → `control` → `repository` → API.
 
-## Navigation & Routing
+## Comandos
 
-- Use **Expo Router** for all navigation. Routes live in `src/app/` — every file there is a screen, `_layout.tsx` files define navigators. Keep non-route code (components, hooks, utils) outside `src/app/`.
-- Import `Link`, `router`, and `useLocalSearchParams` from `expo-router`.
-- Docs: https://docs.expo.dev/router/introduction.md
+```bash
+npx expo start       # servidor de desenvolvimento
+npm run lint         # ESLint + Prettier
+npm run format       # formata o código
+npm run typecheck    # checagem de tipos
+```
 
-## Building with EAS
+Rode `npm run lint` e `npm run typecheck` antes de cada commit.
 
-Use EAS to build, sign, and submit the app in the cloud (`eas build`, `eas submit`) and to ship over-the-air updates (`eas update`) — no local Xcode or Android Studio required. Run EAS CLI as `bunx eas-cli <command>` in Bun projects, or `npx eas-cli@latest <command>` otherwise; substitute that for bare `eas` in docs examples.
-Docs: https://docs.expo.dev/eas/index.md
+## Commits
 
-## Rules
-
-- If `ios/` and `android/` directories do not exist, they are generated (Continuous Native Generation). Never create or edit them by hand — configure native behavior in `app.json` and config plugins.
-- Expo Go only includes its bundled native modules. After adding a library with native code, the app needs a development build: `npx expo run:ios|android` locally, or `eas build --profile development`.
-- Prefer recommended Expo modules over third-party libraries, and check your available skills before adding dependencies. Docs: https://docs.expo.dev/versions/latest/index.md
+Padrão `feat:`, `fix:`, `refactor:`, `style:`, `chore:`, `docs:`, com mensagens em português e um assunto por commit.
