@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { AvaliacaoForm, avaliacaoSchema } from '../model/avaliacao';
-import { ErroApp } from '../model/comum';
+import { camposDoErro, ErroApp } from '../model/comum';
 import { Periodo } from '../model/local';
 import {
   atualizarAvaliacao,
@@ -93,7 +93,7 @@ export const useAvaliacaoFormControl = (
       avisar(editando ? 'Avaliação atualizada' : 'Obrigado! Sua avaliação foi publicada');
       aoConcluir();
     },
-    onError: (erro: ErroApp) => setErros(erro.campos),
+    onError: (erro) => setErros(camposDoErro(erro)),
   });
 
   const exclusao = useMutation({

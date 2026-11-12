@@ -40,3 +40,14 @@ export class ErroApp extends Error {
     this.aguardarSegundos = aguardarSegundos;
   }
 }
+
+/**
+ * Erros de campo de qualquer falha. Só o ErroApp traz `campos`; outros erros (ex.: o
+ * SecureStore falhar depois do login) viram {} para a tela nunca quebrar.
+ */
+export const camposDoErro = (erro: unknown): Record<string, string> =>
+  erro instanceof ErroApp ? erro.campos : {};
+
+/** Mensagem amigável de qualquer falha. */
+export const mensagemDoErro = (erro: unknown): string | null =>
+  erro == null ? null : erro instanceof ErroApp ? erro.message : 'Algo deu errado. Tente de novo.';

@@ -59,7 +59,12 @@ const AuthProvider = ({ children }: AuthProviderProps) => {
   }, [queryClient]);
 
   const entrar = useCallback(async (resposta: TokenResposta) => {
-    await salvarSessao({ token: resposta.token, usuario: resposta.usuario });
+    try {
+      await salvarSessao({ token: resposta.token, usuario: resposta.usuario });
+    } catch {
+      // Se o armazenamento seguro falhar, a pessoa entra mesmo assim: só não fica
+      // logada depois de fechar o app.
+    }
     definirToken(resposta.token);
     setUsuario(resposta.usuario);
     setToken(resposta.token);

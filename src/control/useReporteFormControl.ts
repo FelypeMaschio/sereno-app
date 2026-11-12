@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import * as Crypto from 'expo-crypto';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { ErroApp } from '../model/comum';
+import { camposDoErro, ErroApp } from '../model/comum';
 import { ReporteForm, reporteSchema, StatusEquipamento } from '../model/estacao';
 import {
   atualizarReporte,
@@ -89,10 +89,12 @@ export const useReporteFormControl = (
       avisar(editando ? 'Reporte atualizado' : 'Obrigado! O status foi atualizado para todos');
       aoConcluir();
     },
-    onError: (erro: ErroApp) => {
+    onError: (erro) => {
       setFalhouAntes(true);
-      setErros(erro.campos);
-      if (erro.status === 429) setSegundosParaTentar(erro.aguardarSegundos ?? 30);
+      setErros(camposDoErro(erro));
+      if (erro instanceof ErroApp && erro.status === 429) {
+        setSegundosParaTentar(erro.aguardarSegundos ?? 30);
+      }
     },
   });
 

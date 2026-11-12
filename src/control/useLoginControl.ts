@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useMutation } from '@tanstack/react-query';
 import { useAuth } from '../context/AuthContext';
-import { ErroApp } from '../model/comum';
+import { camposDoErro, mensagemDoErro } from '../model/comum';
 import { LoginForm, loginSchema } from '../model/usuario';
 import { login } from '../repository/remote/authRepository';
 import { ErrosFormulario, validarFormulario } from '../utils/validacao';
@@ -18,7 +18,7 @@ export const useLoginControl = () => {
   const mutacao = useMutation({
     mutationFn: login,
     onSuccess: (resposta) => entrar(resposta),
-    onError: (erro: ErroApp) => setErros(erro.campos),
+    onError: (erro) => setErros(camposDoErro(erro)),
   });
 
   const alterar = (campo: keyof LoginForm, valor: string) => {
@@ -40,6 +40,6 @@ export const useLoginControl = () => {
     enviar,
     enviando: mutacao.isPending,
     // Erro geral (ex.: senha errada, sem internet); erros por campo já vão em `erros`.
-    erroGeral: mutacao.error?.message ?? null,
+    erroGeral: mensagemDoErro(mutacao.error),
   };
 };

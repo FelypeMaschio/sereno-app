@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Linking } from 'react-native';
 import { useMutation } from '@tanstack/react-query';
-import { ErroApp } from '../model/comum';
+import { camposDoErro, ErroApp } from '../model/comum';
 import { Equipamento, Estacao, statusEquipamento, tiposEquipamento } from '../model/estacao';
 import { direitosSchema } from '../model/ia';
 import { consultarDireitos } from '../repository/remote/iaRepository';
@@ -39,7 +39,7 @@ export const useDireitosControl = (estacao: Estacao, comProblema: Equipamento[])
 
   const consulta = useMutation({
     mutationFn: consultarDireitos,
-    onError: (falha: ErroApp) => setErro(falha.campos.situacao ?? null),
+    onError: (falha) => setErro(camposDoErro(falha).situacao ?? null),
   });
 
   const enviar = () => {

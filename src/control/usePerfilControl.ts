@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '../context/AuthContext';
-import { ErroApp } from '../model/comum';
+import { camposDoErro, ErroApp } from '../model/comum';
 import { perfilSchema } from '../model/usuario';
 import { atualizarMeuPerfil, buscarMeuPerfil } from '../repository/remote/authRepository';
 import { avisar, confirmar } from '../utils/feedback';
@@ -28,7 +28,7 @@ export const usePerfilControl = () => {
       setNome(null);
       avisar('Nome atualizado');
     },
-    onError: (erro: ErroApp) => setErros(erro.campos),
+    onError: (erro) => setErros(camposDoErro(erro)),
   });
 
   const enviar = () => {
