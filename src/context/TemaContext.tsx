@@ -1,5 +1,14 @@
-import { createContext, ReactNode, useContext, useEffect, useMemo, useState } from 'react';
+import {
+  createContext,
+  ReactNode,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+} from 'react';
 import { AccessibilityInfo } from 'react-native';
+import { lerModoBaixoEstimulo, salvarModoBaixoEstimulo } from '../repository/local/sessaoLocal';
 import { Tema, temaBaixoEstimulo, temaPadrao } from '../theme';
 
 interface TemaInfo {
@@ -25,16 +34,26 @@ interface TemaProviderProps {
  * sem precisar passar o tema por props de componente em componente.
  */
 const TemaProvider = ({ children }: TemaProviderProps) => {
-  const [modoBaixoEstimulo, setModoBaixoEstimulo] = useState<boolean>(false);
+  const [modoBaixoEstimulo, setModo] = useState<boolean>(false);
 
   useEffect(() => {
-    // Se a pessoa já pediu ao sistema para "reduzir movimento", começamos no modo
-    // baixo estímulo. Depois, a preferência salva no perfil (API) tem prioridade.
-    AccessibilityInfo.isReduceMotionEnabled()
-      .then((reduzir) => {
-        if (reduzir) setModoBaixoEstimulo(true);
-      })
-      .catch(() => {});
+    const carregar = async () => {
+      // 1º: a escolha salva neste aparelho. 2º: se nunca escolheu, seguimos o pedido
+      // de "reduzir movimento" feito nas configurações de acessibilidade do sistema.
+      const salvo = await lerModoBaixoEstimulo();
+      if (salvo !== null) {
+        setModo(salvo);
+        return;
+      }
+      const reduzir = await AccessibilityInfo.isReduceMotionEnabled().catch(() => false);
+      if (reduzir) setModo(true);
+    };
+    carregar();
+  }, []);
+
+  const setModoBaixoEstimulo = useCallback((ativo: boolean) => {
+    setModo(ativo);
+    salvarModoBaixoEstimulo(ativo).catch(() => {});
   }, []);
 
   // useMemo evita recriar o objeto a cada render, o que faria todas as telas que
@@ -45,7 +64,7 @@ const TemaProvider = ({ children }: TemaProviderProps) => {
       modoBaixoEstimulo,
       setModoBaixoEstimulo,
     }),
-    [modoBaixoEstimulo],
+    [modoBaixoEstimulo, setModoBaixoEstimulo],
   );
 
   return <TemaContexto.Provider value={valor}>{children}</TemaContexto.Provider>;
