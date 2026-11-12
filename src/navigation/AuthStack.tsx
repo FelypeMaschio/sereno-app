@@ -13,12 +13,14 @@ const AuthStack = () => {
     <Navigator
       screenOptions={{
         animation: tema.animacoes ? 'default' : 'none',
+        headerStyle: { backgroundColor: tema.cores.fundo },
+        headerShadowVisible: false,
         headerTitleStyle: { fontFamily: tema.familias.negrito },
         headerTintColor: tema.cores.primaria,
       }}
     >
       <Screen name="Login" component={LoginScreen} options={{ headerShown: false }} />
-      <Screen name="Cadastro" component={CadastroScreen} options={{ title: 'Criar conta' }} />
+      <Screen name="Cadastro" component={CadastroScreen} options={{ headerShown: false }} />
     </Navigator>
   );
 };
