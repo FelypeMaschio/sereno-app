@@ -70,13 +70,18 @@ export const useInicioControl = () => {
     const estado: EstadoLocalizacao = localizacao.estado;
     if (estado.tipo !== 'ok') {
       // Sem localização: os mais calmos no geral. A tela nunca fica vazia.
-      return avaliados.slice(0, 3).map((local) => ({ local, distanciaKm: null }));
+      return avaliados
+        .filter((l) => (l.indiceCalma ?? 0) >= INDICE_CALMO)
+        .slice(0, 3)
+        .map((local) => ({ local, distanciaKm: null }));
     }
     const comDistancia = avaliados
       .filter(temCoordenadas)
       .map((local) => ({ local, distanciaKm: distanciaKm(estado.coordenada, local) }));
+    // "Calmo" de verdade: só entram lugares com índice alto (nada de sugerir um
+    // lugar agitado para quem está precisando de calma).
     const perto = comDistancia
-      .filter((s) => s.distanciaKm <= RAIO_CALMA_KM)
+      .filter((s) => s.distanciaKm <= RAIO_CALMA_KM && (s.local.indiceCalma ?? 0) >= INDICE_CALMO)
       .sort(
         (a, b) =>
           (b.local.indiceCalma ?? 0) - (a.local.indiceCalma ?? 0) || a.distanciaKm - b.distanciaKm,

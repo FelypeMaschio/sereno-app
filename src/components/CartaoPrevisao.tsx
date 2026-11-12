@@ -1,3 +1,4 @@
+import { useRef } from 'react';
 import { ActivityIndicator, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useTema } from '../context/TemaContext';
@@ -22,6 +23,7 @@ const CartaoPrevisao = ({ localId }: CartaoPrevisaoProps) => {
   const { cores, espacamento } = tema;
   const controle = usePrevisaoControl(localId);
   const { previsao } = controle;
+  const rolagemHoras = useRef<ScrollView>(null);
 
   // Serviço de IA fora do ar: o cartão some e o resto da tela continua funcionando.
   if (controle.indisponivel) return null;
@@ -41,11 +43,8 @@ const CartaoPrevisao = ({ localId }: CartaoPrevisaoProps) => {
         <Selo texto="Previsão por IA" icone="creation" tom="primaria" />
       </View>
 
-      <ScrollView
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        contentContainerStyle={{ gap: espacamento.sm }}
-      >
+      {/* Os 7 dias cabem na tela: sem rolagem, nenhum fica escondido. */}
+      <View style={[estilos.dias, { gap: espacamento.xs }]}>
         {diasSemana.map((rotulo, indice) => (
           <Chip
             key={rotulo}
@@ -55,11 +54,19 @@ const CartaoPrevisao = ({ localId }: CartaoPrevisaoProps) => {
             onPress={() => controle.setDia(indice as DiaSemana)}
           />
         ))}
-      </ScrollView>
+      </View>
       <ScrollView
         horizontal
         showsHorizontalScrollIndicator={false}
         contentContainerStyle={{ gap: espacamento.sm }}
+        ref={rolagemHoras}
+        // Ao aparecer, rola até a hora selecionada (cada chip tem ~60 px).
+        onLayout={() =>
+          rolagemHoras.current?.scrollTo({
+            x: Math.max(0, (controle.hora - horasDisponiveis[0] - 2) * 60),
+            animated: false,
+          })
+        }
       >
         {horasDisponiveis.map((hora) => (
           <Chip
@@ -150,6 +157,10 @@ const CartaoPrevisao = ({ localId }: CartaoPrevisaoProps) => {
 };
 
 const estilos = StyleSheet.create({
+  dias: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+  },
   linha: {
     flexDirection: 'row',
     alignItems: 'center',

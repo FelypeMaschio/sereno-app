@@ -75,9 +75,9 @@ const FormAvaliacaoScreen = ({ navigation, route }: AppScreenProps<'FormAvaliaca
           icones={[
             'account-outline',
             'account',
+            'account-multiple-outline',
             'account-multiple',
             'account-group',
-            'account-group-outline',
           ]}
           valor={form.nivelLotacao}
           onChange={(valor) => alterar('nivelLotacao', valor)}

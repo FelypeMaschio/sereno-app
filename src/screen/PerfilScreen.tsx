@@ -43,11 +43,13 @@ const PerfilScreen = ({ navigation }: AppScreenProps<'Perfil'>) => {
         <Texto variante="subtitulo">{usuario?.nome}</Texto>
         <Texto secundario>{usuario?.email}</Texto>
         {usuario?.role && (
-          <Selo
-            texto={usuario.role === 'GESTOR' ? 'Gestor(a)' : 'Cidadã(o)'}
-            icone={usuario.role === 'GESTOR' ? 'shield-account-outline' : 'account-outline'}
-            tom="primaria"
-          />
+          <View style={estilos.centro}>
+            <Selo
+              texto={usuario.role === 'GESTOR' ? 'Gestor(a)' : 'Cidadã(o)'}
+              icone={usuario.role === 'GESTOR' ? 'shield-account-outline' : 'account-outline'}
+              tom="primaria"
+            />
+          </View>
         )}
       </View>
 
@@ -116,6 +118,9 @@ const estilos = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 12,
+  },
+  centro: {
+    alignItems: 'center',
   },
   flex: {
     flex: 1,
