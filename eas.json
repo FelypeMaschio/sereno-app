@@ -1,0 +1,31 @@
+{
+  "cli": {
+    "version": ">= 16.0.0",
+    "appVersionSource": "local"
+  },
+  "build": {
+    "base": {
+      "env": {
+        "EXPO_PUBLIC_API_JAVA_URL": "https://sereno-api-ayhx.onrender.com",
+        "EXPO_PUBLIC_API_DOTNET_URL": "https://projeto-gs-2026-serenoapi.onrender.com",
+        "EXPO_PUBLIC_API_IA_URL": "https://sereno-ia-rm563009.azurewebsites.net"
+      }
+    },
+    "preview": {
+      "extends": "base",
+      "distribution": "internal",
+      "android": {
+        "buildType": "apk"
+      }
+    },
+    "production": {
+      "extends": "base",
+      "android": {
+        "buildType": "apk"
+      }
+    }
+  },
+  "submit": {
+    "production": {}
+  }
+}
