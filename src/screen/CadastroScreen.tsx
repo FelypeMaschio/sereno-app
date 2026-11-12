@@ -1,21 +1,18 @@
-import { useState } from 'react';
 import { KeyboardAvoidingView, Platform, ScrollView, StyleSheet, View } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import Botao from '../components/Botao';
 import CampoTexto from '../components/CampoTexto';
 import Cartao from '../components/Cartao';
 import HeroMarca from '../components/HeroMarca';
+import MensagemErro from '../components/MensagemErro';
 import Texto from '../components/Texto';
 import { useTema } from '../context/TemaContext';
+import { useCadastroControl } from '../control/useCadastroControl';
 import { AuthScreenProps } from '../navigation/types';
 
-// Provisória: a validação com Yup e o cadastro na API Java chegam na Etapa 5.
 const CadastroScreen = ({ navigation }: AuthScreenProps<'Cadastro'>) => {
   const { tema } = useTema();
-  const [nome, setNome] = useState<string>('');
-  const [email, setEmail] = useState<string>('');
-  const [senha, setSenha] = useState<string>('');
-  const [confirmacao, setConfirmacao] = useState<string>('');
+  const { form, erros, alterar, enviar, enviando, erroGeral } = useCadastroControl();
 
   return (
     <KeyboardAvoidingView
@@ -34,36 +31,46 @@ const CadastroScreen = ({ navigation }: AuthScreenProps<'Cadastro'>) => {
             <CampoTexto
               rotulo="Nome"
               placeholder="Como quer ser chamado(a)"
-              value={nome}
-              onChangeText={setNome}
+              value={form.nome}
+              onChangeText={(valor) => alterar('nome', valor)}
+              erro={erros.nome}
               autoComplete="name"
             />
             <CampoTexto
               rotulo="E-mail"
               placeholder="voce@exemplo.com"
-              value={email}
-              onChangeText={setEmail}
+              value={form.email}
+              onChangeText={(valor) => alterar('email', valor)}
+              erro={erros.email}
               keyboardType="email-address"
               autoCapitalize="none"
               autoComplete="email"
             />
             <CampoTexto
               rotulo="Senha"
-              placeholder="Pelo menos 6 caracteres"
-              value={senha}
-              onChangeText={setSenha}
+              placeholder="8 caracteres ou mais, com letras e números"
+              value={form.senha}
+              onChangeText={(valor) => alterar('senha', valor)}
+              erro={erros.senha}
               secureTextEntry
               autoComplete="new-password"
             />
             <CampoTexto
               rotulo="Confirmar senha"
               placeholder="Repita a senha"
-              value={confirmacao}
-              onChangeText={setConfirmacao}
+              value={form.confirmacao}
+              onChangeText={(valor) => alterar('confirmacao', valor)}
+              erro={erros.confirmacao}
               secureTextEntry
               autoComplete="new-password"
             />
-            <Botao titulo="Criar conta" icone="account-plus-outline" onPress={() => {}} />
+            {erroGeral && Object.keys(erros).length === 0 && <MensagemErro mensagem={erroGeral} />}
+            <Botao
+              titulo="Criar conta"
+              icone="account-plus-outline"
+              carregando={enviando}
+              onPress={enviar}
+            />
           </Cartao>
 
           <View style={{ gap: tema.espacamento.sm }}>

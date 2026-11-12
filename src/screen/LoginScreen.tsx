@@ -1,21 +1,18 @@
-import { useState } from 'react';
 import { KeyboardAvoidingView, Platform, ScrollView, StyleSheet, View } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import Botao from '../components/Botao';
 import CampoTexto from '../components/CampoTexto';
 import Cartao from '../components/Cartao';
 import HeroMarca from '../components/HeroMarca';
+import MensagemErro from '../components/MensagemErro';
 import Texto from '../components/Texto';
-import { useAuth } from '../context/AuthContext';
 import { useTema } from '../context/TemaContext';
+import { useLoginControl } from '../control/useLoginControl';
 import { AuthScreenProps } from '../navigation/types';
 
-// Provisória: a validação com Yup e o login na API Java chegam na Etapa 5.
 const LoginScreen = ({ navigation }: AuthScreenProps<'Login'>) => {
-  const { entrar } = useAuth();
   const { tema } = useTema();
-  const [email, setEmail] = useState<string>('');
-  const [senha, setSenha] = useState<string>('');
+  const { form, erros, alterar, enviar, enviando, erroGeral } = useLoginControl();
 
   return (
     <KeyboardAvoidingView
@@ -31,21 +28,29 @@ const LoginScreen = ({ navigation }: AuthScreenProps<'Login'>) => {
             <CampoTexto
               rotulo="E-mail"
               placeholder="voce@exemplo.com"
-              value={email}
-              onChangeText={setEmail}
+              value={form.email}
+              onChangeText={(valor) => alterar('email', valor)}
+              erro={erros.email}
               keyboardType="email-address"
               autoCapitalize="none"
               autoComplete="email"
+              textContentType="emailAddress"
+              returnKeyType="next"
             />
             <CampoTexto
               rotulo="Senha"
               placeholder="Sua senha"
-              value={senha}
-              onChangeText={setSenha}
+              value={form.senha}
+              onChangeText={(valor) => alterar('senha', valor)}
+              erro={erros.senha}
               secureTextEntry
               autoComplete="password"
+              textContentType="password"
+              returnKeyType="go"
+              onSubmitEditing={enviar}
             />
-            <Botao titulo="Entrar" icone="login" onPress={() => entrar('token-de-teste')} />
+            {erroGeral && !erros.email && !erros.senha && <MensagemErro mensagem={erroGeral} />}
+            <Botao titulo="Entrar" icone="login" carregando={enviando} onPress={enviar} />
           </Cartao>
 
           <View style={[estilos.rodape, { gap: tema.espacamento.sm }]}>
