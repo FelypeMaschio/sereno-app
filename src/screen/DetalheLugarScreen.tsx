@@ -3,6 +3,8 @@ import { RefreshControl, ScrollView, StyleSheet, View } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import Botao from '../components/Botao';
 import Carregando from '../components/Carregando';
+import CartaoInsight from '../components/CartaoInsight';
+import CartaoPrevisao from '../components/CartaoPrevisao';
 import Cartao from '../components/Cartao';
 import EstadoVazio from '../components/EstadoVazio';
 import IndiceCalma from '../components/IndiceCalma';
@@ -94,6 +96,11 @@ const DetalheLugarScreen = ({ navigation, route }: AppScreenProps<'DetalheLugar'
           <Texto>{local.recursosAcessibilidade}</Texto>
         </Cartao>
       ) : null}
+
+      {/* Dois cartões de IA com perguntas diferentes: "quando ir" (previsão para o
+          horário escolhido) e "como é" (resumo do que as pessoas relataram). */}
+      <CartaoPrevisao localId={localId} />
+      <CartaoInsight localId={localId} />
 
       <Botao
         titulo="Avaliar este lugar"

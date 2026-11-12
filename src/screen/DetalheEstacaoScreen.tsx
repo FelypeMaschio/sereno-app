@@ -2,6 +2,7 @@ import { useLayoutEffect } from 'react';
 import { RefreshControl, ScrollView, StyleSheet, View } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import Carregando from '../components/Carregando';
+import CartaoDireitos from '../components/CartaoDireitos';
 import Cartao from '../components/Cartao';
 import EstadoVazio from '../components/EstadoVazio';
 import ItemEquipamento from '../components/ItemEquipamento';
@@ -78,6 +79,10 @@ const DetalheEstacaoScreen = ({ navigation, route }: AppScreenProps<'DetalheEsta
         ) : null}
         <Selo texto={resumo.texto} icone={resumo.icone} tom={resumo.tom} />
       </Cartao>
+
+      {controle.comProblema.length > 0 && (
+        <CartaoDireitos estacao={estacao} comProblema={controle.comProblema} />
+      )}
 
       <Texto variante="subtitulo">Equipamentos</Texto>
       {controle.equipamentos.length === 0 ? (
