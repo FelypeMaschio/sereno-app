@@ -29,8 +29,10 @@ export const usePrevisaoControl = (localId: number) => {
     queryKey: chaves.previsao(localId, dia, hora),
     queryFn: ({ signal }) => preverCalma({ localId, diaSemana: dia, hora }, signal),
     staleTime: 10 * 60_000,
-    // Sem nova tentativa: se a IA estiver fora, o cartão some sem atrasar a tela.
-    retry: false,
+    // A IA (Azure) e o Java (Render) "dormem" sem uso: o primeiro acesso pode dar 503
+    // ou estourar o tempo. Tentamos de novo UMA vez, 3 s depois, antes de esconder o cartão.
+    retry: 1,
+    retryDelay: 3000,
   });
 
   return {

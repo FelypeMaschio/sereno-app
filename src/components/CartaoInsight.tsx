@@ -20,7 +20,8 @@ const CartaoInsight = ({ localId }: { localId: number }) => {
   const consulta = useQuery({
     queryKey: chaves.insight(localId),
     queryFn: () => buscarInsight(localId),
-    retry: false,
+    retry: 1, // uma nova tentativa se o servidor estiver acordando
+    retryDelay: 3000,
     staleTime: 5 * 60_000,
   });
   const insight = consulta.data;
