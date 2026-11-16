@@ -45,6 +45,14 @@
         {
           "locationWhenInUsePermission": "O Sereno usa sua localização só quando você pede um lugar calmo por perto. Ela não sai do seu celular."
         }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "O Sereno usa suas fotos só para você escolher a foto de perfil, que fica guardada neste aparelho.",
+          "cameraPermission": "O Sereno usa a câmera só para você tirar a foto de perfil, que fica guardada neste aparelho.",
+          "microphonePermission": false
+        }
       ]
     ],
     "backgroundColor": "#F6F3EC",

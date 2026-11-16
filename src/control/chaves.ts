@@ -15,6 +15,7 @@ export const chaves = {
   reporte: (id: number) => ['reporte', id] as const,
   meusReportes: ['reportes', 'meus'] as const,
   perfil: ['perfil'] as const,
+  fotoPerfil: (usuarioId: number) => ['fotoPerfil', usuarioId] as const,
   previsao: (localId: number, dia: number, hora: number) =>
     ['previsao', localId, dia, hora] as const,
 };

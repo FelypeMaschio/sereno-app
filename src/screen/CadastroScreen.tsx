@@ -1,5 +1,6 @@
-import { KeyboardAvoidingView, Platform, ScrollView, StyleSheet, View } from 'react-native';
+import { ScrollView, StyleSheet, View } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
+import AreaTeclado from '../components/AreaTeclado';
 import Botao from '../components/Botao';
 import CampoTexto from '../components/CampoTexto';
 import Cartao from '../components/Cartao';
@@ -16,10 +17,7 @@ const CadastroScreen = ({ navigation }: AuthScreenProps<'Cadastro'>) => {
   const { form, erros, alterar, enviar, enviando, erroGeral } = useCadastroControl();
 
   return (
-    <KeyboardAvoidingView
-      style={[estilos.flex, { backgroundColor: tema.cores.fundo }]}
-      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-    >
+    <AreaTeclado style={{ backgroundColor: tema.cores.fundo }}>
       <StatusBar style="light" />
       <ScrollView keyboardShouldPersistTaps="handled" contentContainerStyle={estilos.rolagem}>
         <HeroMarca
@@ -85,14 +83,11 @@ const CadastroScreen = ({ navigation }: AuthScreenProps<'Cadastro'>) => {
           </View>
         </View>
       </ScrollView>
-    </KeyboardAvoidingView>
+    </AreaTeclado>
   );
 };
 
 const estilos = StyleSheet.create({
-  flex: {
-    flex: 1,
-  },
   rolagem: {
     flexGrow: 1,
   },

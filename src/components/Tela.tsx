@@ -2,6 +2,7 @@ import { ReactNode } from 'react';
 import { ScrollView, StyleSheet, View } from 'react-native';
 import { Edge, SafeAreaView } from 'react-native-safe-area-context';
 import { useTema } from '../context/TemaContext';
+import AreaTeclado from './AreaTeclado';
 
 interface TelaProps {
   children: ReactNode;
@@ -22,9 +23,12 @@ const Tela = ({ children, rolavel = true, bordas = ['left', 'right'] }: TelaProp
   return (
     <SafeAreaView edges={bordas} style={[estilos.flex, { backgroundColor: tema.cores.fundo }]}>
       {rolavel ? (
-        <ScrollView contentContainerStyle={estiloConteudo} keyboardShouldPersistTaps="handled">
-          {children}
-        </ScrollView>
+        // Telas roláveis são as que têm formulário: sobem junto quando o teclado abre.
+        <AreaTeclado>
+          <ScrollView contentContainerStyle={estiloConteudo} keyboardShouldPersistTaps="handled">
+            {children}
+          </ScrollView>
+        </AreaTeclado>
       ) : (
         <View style={[estilos.flex, estiloConteudo]}>{children}</View>
       )}

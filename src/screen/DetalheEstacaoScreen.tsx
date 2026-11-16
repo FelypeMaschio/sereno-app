@@ -1,6 +1,7 @@
 import { useLayoutEffect } from 'react';
 import { RefreshControl, ScrollView, StyleSheet, View } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import AreaTeclado from '../components/AreaTeclado';
 import Carregando from '../components/Carregando';
 import CartaoDireitos from '../components/CartaoDireitos';
 import Cartao from '../components/Cartao';
@@ -44,65 +45,71 @@ const DetalheEstacaoScreen = ({ navigation, route }: AppScreenProps<'DetalheEsta
   const resumo = resumoEstacao(controle.comProblema.length);
 
   return (
-    <ScrollView
-      style={{ backgroundColor: cores.fundo }}
-      contentContainerStyle={{ padding: espacamento.lg, gap: espacamento.md }}
-      refreshControl={
-        <RefreshControl
-          refreshing={controle.recarregando}
-          onRefresh={controle.recarregar}
-          colors={[cores.primaria]}
-          tintColor={cores.primaria}
-        />
-      }
-    >
-      <Cartao>
-        <Texto variante="subtitulo">Estação {estacao.nome}</Texto>
-        {estacao.linha ? (
-          <View style={[estilos.linhas, { gap: espacamento.xs }]}>
-            {estacao.linha.split(',').map((linha) => (
-              <Selo key={linha} texto={linha.trim()} icone="train" tom="info" />
-            ))}
-          </View>
-        ) : null}
-        {estacao.endereco ? (
-          <View style={[estilos.linha, { gap: espacamento.sm }]}>
-            <MaterialCommunityIcons
-              name="map-marker-outline"
-              size={20}
-              color={cores.textoSecundario}
-            />
-            <Texto secundario style={estilos.flex}>
-              {estacao.endereco}
-            </Texto>
-          </View>
-        ) : null}
-        <Selo texto={resumo.texto} icone={resumo.icone} tom={resumo.tom} />
-      </Cartao>
-
-      {controle.comProblema.length > 0 && (
-        <CartaoDireitos estacao={estacao} comProblema={controle.comProblema} />
-      )}
-
-      <Texto variante="subtitulo">Equipamentos</Texto>
-      {controle.equipamentos.length === 0 ? (
+    // O cartão "Quais são meus direitos?" tem campo de texto: a tela sobe com o teclado.
+    <AreaTeclado>
+      <ScrollView
+        keyboardShouldPersistTaps="handled"
+        style={{ backgroundColor: cores.fundo }}
+        contentContainerStyle={{ padding: espacamento.lg, gap: espacamento.md }}
+        refreshControl={
+          <RefreshControl
+            refreshing={controle.recarregando}
+            onRefresh={controle.recarregar}
+            colors={[cores.primaria]}
+            tintColor={cores.primaria}
+          />
+        }
+      >
         <Cartao>
-          <EstadoVazio
-            icone="elevator-passenger-outline"
-            titulo="Nenhum equipamento cadastrado"
-            descricao="Esta estação ainda não tem elevadores, escadas ou rampas registrados."
-          />
+          <Texto variante="subtitulo">Estação {estacao.nome}</Texto>
+          {estacao.linha ? (
+            <View style={[estilos.linhas, { gap: espacamento.xs }]}>
+              {estacao.linha.split(',').map((linha) => (
+                <Selo key={linha} texto={linha.trim()} icone="train" tom="info" />
+              ))}
+            </View>
+          ) : null}
+          {estacao.endereco ? (
+            <View style={[estilos.linha, { gap: espacamento.sm }]}>
+              <MaterialCommunityIcons
+                name="map-marker-outline"
+                size={20}
+                color={cores.textoSecundario}
+              />
+              <Texto secundario style={estilos.flex}>
+                {estacao.endereco}
+              </Texto>
+            </View>
+          ) : null}
+          <Selo texto={resumo.texto} icone={resumo.icone} tom={resumo.tom} />
         </Cartao>
-      ) : (
-        controle.equipamentos.map((equipamento) => (
-          <ItemEquipamento
-            key={equipamento.id}
-            equipamento={equipamento}
-            onReportar={() => navigation.navigate('FormReporte', { equipamentoId: equipamento.id })}
-          />
-        ))
-      )}
-    </ScrollView>
+
+        {controle.comProblema.length > 0 && (
+          <CartaoDireitos estacao={estacao} comProblema={controle.comProblema} />
+        )}
+
+        <Texto variante="subtitulo">Equipamentos</Texto>
+        {controle.equipamentos.length === 0 ? (
+          <Cartao>
+            <EstadoVazio
+              icone="elevator-passenger-outline"
+              titulo="Nenhum equipamento cadastrado"
+              descricao="Esta estação ainda não tem elevadores, escadas ou rampas registrados."
+            />
+          </Cartao>
+        ) : (
+          controle.equipamentos.map((equipamento) => (
+            <ItemEquipamento
+              key={equipamento.id}
+              equipamento={equipamento}
+              onReportar={() =>
+                navigation.navigate('FormReporte', { equipamentoId: equipamento.id })
+              }
+            />
+          ))
+        )}
+      </ScrollView>
+    </AreaTeclado>
   );
 };
 

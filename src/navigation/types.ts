@@ -20,6 +20,7 @@ export type MainTabsParamList = {
   Lugares: undefined;
   Estacoes: undefined;
   Contribuicoes: undefined;
+  Perfil: undefined;
 };
 
 /** Pilha do app logado: as abas + telas de detalhe e formulários por cima delas. */
@@ -31,7 +32,6 @@ export type AppStackParamList = {
   DetalheEstacao: { estacaoId: number };
   /** Sem reporteId = novo reporte; com reporteId = edição. */
   FormReporte: { equipamentoId: number; reporteId?: number };
-  Perfil: undefined;
   Sobre: undefined;
 };
 

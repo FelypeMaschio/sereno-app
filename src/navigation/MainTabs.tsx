@@ -1,13 +1,13 @@
-import { Pressable, StyleSheet } from 'react-native';
+import { Image } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { useNavigation } from '@react-navigation/native';
 import { useTema } from '../context/TemaContext';
-import { AREA_MINIMA_DE_TOQUE } from '../theme';
+import { useFotoPerfilControl } from '../control/useFotoPerfilControl';
 import ContribuicoesScreen from '../screen/ContribuicoesScreen';
 import EstacoesScreen from '../screen/EstacoesScreen';
 import InicioScreen from '../screen/InicioScreen';
 import LugaresScreen from '../screen/LugaresScreen';
+import PerfilScreen from '../screen/PerfilScreen';
 import { MainTabsParamList } from './types';
 
 const { Navigator, Screen } = createBottomTabNavigator<MainTabsParamList>();
@@ -20,22 +20,36 @@ const icones: Record<keyof MainTabsParamList, [NomeIcone, NomeIcone]> = {
   Lugares: ['map-marker-outline', 'map-marker'],
   Estacoes: ['subway-variant', 'subway-variant'],
   Contribuicoes: ['account-heart-outline', 'account-heart'],
+  Perfil: ['account-circle-outline', 'account-circle'],
 };
 
-/** Botão do cabeçalho que leva ao Perfil (fica acessível em todas as abas). */
-const BotaoPerfil = () => {
-  const navigation = useNavigation();
-  const { tema } = useTema();
+interface IconeAbaProps {
+  focused: boolean;
+  color: string;
+  size: number;
+}
 
+/** Na aba Perfil, a própria foto da pessoa vira o ícone (se ela tiver colocado uma). */
+const IconePerfil = ({ focused, color, size }: IconeAbaProps) => {
+  const { uri } = useFotoPerfilControl();
+  if (!uri) {
+    return (
+      <MaterialCommunityIcons name={icones.Perfil[focused ? 1 : 0]} size={size} color={color} />
+    );
+  }
   return (
-    <Pressable
-      onPress={() => navigation.navigate('Perfil')}
-      accessibilityRole="button"
-      accessibilityLabel="Perfil e preferências"
-      style={estilos.botaoPerfil}
-    >
-      <MaterialCommunityIcons name="account-circle-outline" size={28} color={tema.cores.primaria} />
-    </Pressable>
+    <Image
+      source={{ uri }}
+      accessible={false}
+      style={{
+        width: size + 2,
+        height: size + 2,
+        borderRadius: (size + 2) / 2,
+        // Anel na cor da aba: mostra que ela está ativa sem depender só da foto.
+        borderWidth: focused ? 2 : 1,
+        borderColor: color,
+      }}
+    />
   );
 };
 
@@ -45,13 +59,16 @@ const MainTabs = () => {
   return (
     <Navigator
       screenOptions={({ route }) => ({
-        tabBarIcon: ({ focused, color, size }) => (
-          <MaterialCommunityIcons
-            name={icones[route.name][focused ? 1 : 0]}
-            size={size}
-            color={color}
-          />
-        ),
+        tabBarIcon: (props) =>
+          route.name === 'Perfil' ? (
+            <IconePerfil {...props} />
+          ) : (
+            <MaterialCommunityIcons
+              name={icones[route.name][props.focused ? 1 : 0]}
+              size={props.size}
+              color={props.color}
+            />
+          ),
         tabBarActiveTintColor: tema.cores.primaria,
         tabBarInactiveTintColor: tema.cores.textoSecundario,
         tabBarLabelStyle: { fontFamily: tema.familias.negrito, fontSize: 12 },
@@ -59,12 +76,15 @@ const MainTabs = () => {
           backgroundColor: tema.cores.superficie,
           borderTopColor: tema.cores.superficieAlternativa,
         },
+        // O teclado cobre a barra de abas em vez de empurrá-la para cima dos campos.
+        tabBarHideOnKeyboard: true,
         // Cabeçalho da mesma cor do fundo e sem sombra: a tela parece uma peça só.
         headerStyle: { backgroundColor: tema.cores.fundo },
         headerShadowVisible: false,
         headerTitleStyle: { fontFamily: tema.familias.negrito, fontSize: 20 },
-        headerRight: () => <BotaoPerfil />,
-        animation: tema.animacoes ? 'fade' : 'none',
+        // Troca de aba sem animação, sempre. Mudar esse valor com o app aberto (ao ligar
+        // o modo baixo estímulo) recriava o contêiner das abas e deixava as telas em branco.
+        animation: 'none',
       })}
     >
       <Screen name="Inicio" component={InicioScreen} options={{ title: 'Início' }} />
@@ -73,20 +93,15 @@ const MainTabs = () => {
       <Screen
         name="Contribuicoes"
         component={ContribuicoesScreen}
-        options={{ title: 'Minhas contribuições', tabBarLabel: 'Contribuições' }}
+        options={{ title: 'Minhas contribuições', tabBarLabel: 'Atividade' }}
+      />
+      <Screen
+        name="Perfil"
+        component={PerfilScreen}
+        options={{ title: 'Meu perfil', tabBarLabel: 'Perfil' }}
       />
     </Navigator>
   );
 };
-
-const estilos = StyleSheet.create({
-  botaoPerfil: {
-    width: AREA_MINIMA_DE_TOQUE,
-    height: AREA_MINIMA_DE_TOQUE,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginRight: 8,
-  },
-});
 
 export default MainTabs;

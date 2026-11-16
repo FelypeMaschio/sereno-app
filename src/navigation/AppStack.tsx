@@ -4,7 +4,6 @@ import DetalheEstacaoScreen from '../screen/DetalheEstacaoScreen';
 import DetalheLugarScreen from '../screen/DetalheLugarScreen';
 import FormAvaliacaoScreen from '../screen/FormAvaliacaoScreen';
 import FormReporteScreen from '../screen/FormReporteScreen';
-import PerfilScreen from '../screen/PerfilScreen';
 import SobreScreen from '../screen/SobreScreen';
 import MainTabs from './MainTabs';
 import { AppStackParamList } from './types';
@@ -50,7 +49,6 @@ const AppStack = () => {
           title: route.params.reporteId ? 'Editar reporte' : 'Reportar status',
         })}
       />
-      <Screen name="Perfil" component={PerfilScreen} options={{ title: 'Perfil e preferências' }} />
       <Screen name="Sobre" component={SobreScreen} options={{ title: 'Sobre o app' }} />
     </Navigator>
   );

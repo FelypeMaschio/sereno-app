@@ -37,7 +37,7 @@ Global Solution FIAP 2026/2 · tema **CitizenTech** · área **Cidades** · ODS 
 | 8   | Detalhe da estação   | Equipamentos, status, "frescor" do status e "Quais são meus direitos?" (IA)            | .NET + IA                      |
 | 9   | Reporte              | **CRUD**: criar (com `Idempotency-Key`), editar e excluir reporte                      | .NET `/api/reportes`           |
 | 10  | Minhas contribuições | Avaliações e reportes da pessoa, com editar e excluir                                  | Java + .NET                    |
-| 11  | Perfil               | Dados, edição do nome, modo baixo estímulo e logout                                    | Java `/api/usuarios/me`        |
+| 11  | Perfil (aba)         | Foto de perfil (só no aparelho), edição do nome, modo baixo estímulo e logout          | Java `/api/usuarios/me`        |
 | —   | Sobre o app          | Versão e **hash do commit** da build                                                   | —                              |
 
 ### Diferenciais
@@ -123,6 +123,7 @@ Ao abrir o formulário de reporte, o app gera um UUID (`expo-crypto`) e o envia 
 | `expo-crypto`                                                                                                          | UUID da `Idempotency-Key`                                                         |
 | `expo-location`                                                                                                        | Localização aproximada para "Preciso de calma agora"                              |
 | `expo-font` + `expo-splash-screen`                                                                                     | Fonte Atkinson Hyperlegible e splash até a fonte carregar                         |
+| `expo-image-picker` + `expo-file-system`                                                                               | Foto de perfil pela galeria ou câmera, guardada só no aparelho (LGPD)             |
 | `expo-constants`                                                                                                       | Ler o hash do commit na tela Sobre                                                |
 | `@expo/vector-icons`                                                                                                   | Ícones consistentes em todos os aparelhos (emojis mudam de um celular para outro) |
 | ESLint + Prettier                                                                                                      | Padronização e qualidade do código                                                |

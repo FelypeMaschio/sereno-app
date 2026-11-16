@@ -1,4 +1,5 @@
 import { StyleSheet, Switch, View } from 'react-native';
+import Avatar from '../components/Avatar';
 import Botao from '../components/Botao';
 import CampoTexto from '../components/CampoTexto';
 import Carregando from '../components/Carregando';
@@ -8,22 +9,15 @@ import Selo from '../components/Selo';
 import Tela from '../components/Tela';
 import Texto from '../components/Texto';
 import { useTema } from '../context/TemaContext';
+import { useFotoPerfilControl } from '../control/useFotoPerfilControl';
 import { usePerfilControl } from '../control/usePerfilControl';
-import { AppScreenProps } from '../navigation/types';
+import { TabScreenProps } from '../navigation/types';
 
-/** Iniciais para o "avatar" (ex.: "Felype Maschio" → "FM"). */
-const iniciais = (nome?: string) =>
-  (nome ?? '')
-    .split(' ')
-    .filter(Boolean)
-    .slice(0, 2)
-    .map((parte) => parte[0]?.toUpperCase())
-    .join('');
-
-const PerfilScreen = ({ navigation }: AppScreenProps<'Perfil'>) => {
+const PerfilScreen = ({ navigation }: TabScreenProps<'Perfil'>) => {
   const { tema, modoBaixoEstimulo, setModoBaixoEstimulo } = useTema();
   const { cores, espacamento } = tema;
   const controle = usePerfilControl();
+  const foto = useFotoPerfilControl();
   const { usuario } = controle;
 
   if (controle.carregando) return <Carregando mensagem="Carregando seu perfil…" />;
@@ -31,15 +25,7 @@ const PerfilScreen = ({ navigation }: AppScreenProps<'Perfil'>) => {
   return (
     <Tela>
       <View style={[estilos.topo, { gap: espacamento.sm }]}>
-        <View
-          style={[estilos.avatar, { backgroundColor: cores.primaria }]}
-          accessible={false}
-          importantForAccessibility="no-hide-descendants"
-        >
-          <Texto variante="titulo" cor={cores.textoSobrePrimaria}>
-            {iniciais(usuario?.nome)}
-          </Texto>
-        </View>
+        <Avatar nome={usuario?.nome} uri={foto.uri} />
         <Texto variante="subtitulo">{usuario?.nome}</Texto>
         <Texto secundario>{usuario?.email}</Texto>
         {usuario?.role && (
@@ -52,6 +38,43 @@ const PerfilScreen = ({ navigation }: AppScreenProps<'Perfil'>) => {
           </View>
         )}
       </View>
+
+      <Cartao style={{ gap: espacamento.md }}>
+        <Texto variante="subtitulo">Foto de perfil</Texto>
+        <Texto variante="legenda" secundario>
+          A foto fica guardada só neste celular. Ela não é enviada para nenhum servidor.
+        </Texto>
+        <View style={[estilos.botoesFoto, { gap: espacamento.sm }]}>
+          <View style={estilos.flex}>
+            <Botao
+              titulo="Galeria"
+              icone="image-outline"
+              variante="secundario"
+              carregando={foto.trocando}
+              onPress={foto.escolherDaGaleria}
+              dica="Escolher uma foto da galeria"
+            />
+          </View>
+          <View style={estilos.flex}>
+            <Botao
+              titulo="Câmera"
+              icone="camera-outline"
+              variante="secundario"
+              desabilitado={foto.trocando}
+              onPress={foto.tirarFoto}
+              dica="Tirar uma foto agora"
+            />
+          </View>
+        </View>
+        {foto.uri && (
+          <Botao
+            titulo="Remover foto"
+            icone="trash-can-outline"
+            variante="secundario"
+            onPress={foto.remover}
+          />
+        )}
+      </Cartao>
 
       <Cartao style={{ gap: espacamento.md }}>
         <Texto variante="subtitulo">Seus dados</Texto>
@@ -107,12 +130,8 @@ const estilos = StyleSheet.create({
     alignItems: 'center',
     paddingVertical: 8,
   },
-  avatar: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-    alignItems: 'center',
-    justifyContent: 'center',
+  botoesFoto: {
+    flexDirection: 'row',
   },
   linha: {
     flexDirection: 'row',
