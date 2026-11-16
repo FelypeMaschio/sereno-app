@@ -47,6 +47,12 @@
         }
       ]
     ],
-    "backgroundColor": "#F6F3EC"
+    "backgroundColor": "#F6F3EC",
+    "owner": "felypemaschio",
+    "extra": {
+      "eas": {
+        "projectId": "a4f7f4b8-c3e8-4017-a6f5-c270739bf523"
+      }
+    }
   }
 }
