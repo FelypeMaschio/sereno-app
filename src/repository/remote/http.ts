@@ -1,5 +1,6 @@
 import { AxiosError, AxiosInstance, create, isAxiosError } from 'axios';
 import { ErroApiResposta, ErroApp } from '../../model/comum';
+import { tokenExpirado } from '../../utils/jwt';
 
 /**
  * Camada HTTP: três clientes Axios, um para cada serviço do grupo.
@@ -97,7 +98,13 @@ export const converterErro = (erro: unknown): ErroApp => {
   return new ErroApp(mensagem, status, campos, Number.isFinite(aguardar) ? aguardar : null);
 };
 
-const configurar = (cliente: AxiosInstance, ehLogin = false) => {
+/**
+ * `emissor` = a API que cria o token (Java). Um 401 dela significa sessão inválida.
+ * Nas outras (.NET e IA), um 401 com o token ainda dentro da validade quer dizer que
+ * AQUELE serviço não aceitou o token (configuração diferente do segredo, por exemplo):
+ * deslogar a pessoa não resolveria nada, então mostramos o erro e mantemos a sessão.
+ */
+const configurar = (cliente: AxiosInstance, emissor: boolean, nomeServico: string) => {
   cliente.interceptors.request.use((config) => {
     if (tokenAtual) {
       config.headers.Authorization = `Bearer ${tokenAtual}`;
@@ -109,17 +116,27 @@ const configurar = (cliente: AxiosInstance, ehLogin = false) => {
     (resposta) => resposta,
     (erro) => {
       const erroApp = converterErro(erro);
-      // 401 com sessão ativa = token expirado ou inválido: encerra a sessão.
-      // (No login, 401 só quer dizer "senha errada", então não desloga.)
-      const urlLogin = erro?.config?.url?.startsWith('/auth/');
-      if (erroApp.status === 401 && tokenAtual && !(ehLogin && urlLogin)) {
+      if (erroApp.status !== 401 || !tokenAtual) return Promise.reject(erroApp);
+
+      // No login, 401 só quer dizer "senha errada": não há sessão para encerrar.
+      const rotaDeLogin = erro?.config?.url?.startsWith('/auth/');
+      if (emissor && rotaDeLogin) return Promise.reject(erroApp);
+
+      if (emissor || tokenExpirado(tokenAtual)) {
         aoPerderSessao?.();
+        return Promise.reject(erroApp);
       }
-      return Promise.reject(erroApp);
+
+      return Promise.reject(
+        new ErroApp(
+          `O serviço de ${nomeServico} não aceitou seu acesso agora. Tente de novo em instantes; se continuar, saia e entre de novo.`,
+          401,
+        ),
+      );
     },
   );
 };
 
-configurar(apiJava, true);
-configurar(apiDotnet);
-configurar(apiIa);
+configurar(apiJava, true, 'lugares');
+configurar(apiDotnet, false, 'estações');
+configurar(apiIa, false, 'inteligência artificial');
