@@ -1,5 +1,6 @@
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { useTema } from '../context/TemaContext';
+import AdicionarLugarScreen from '../screen/AdicionarLugarScreen';
 import DetalheEstacaoScreen from '../screen/DetalheEstacaoScreen';
 import DetalheLugarScreen from '../screen/DetalheLugarScreen';
 import FormAvaliacaoScreen from '../screen/FormAvaliacaoScreen';
@@ -30,6 +31,11 @@ const AppStack = () => {
     >
       <Screen name="MainTabs" component={MainTabs} options={{ headerShown: false }} />
       <Screen name="DetalheLugar" component={DetalheLugarScreen} options={{ title: 'Lugar' }} />
+      <Screen
+        name="AdicionarLugar"
+        component={AdicionarLugarScreen}
+        options={{ title: 'Adicionar lugar' }}
+      />
       <Screen
         name="FormAvaliacao"
         component={FormAvaliacaoScreen}

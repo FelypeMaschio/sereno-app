@@ -1,11 +1,13 @@
 import {
   ActivityIndicator,
   FlatList,
+  Pressable,
   RefreshControl,
   ScrollView,
   StyleSheet,
   View,
 } from 'react-native';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 import CampoBusca from '../components/CampoBusca';
 import Carregando from '../components/Carregando';
 import Chip from '../components/Chip';
@@ -18,11 +20,15 @@ import { useTema } from '../context/TemaContext';
 import { useLugaresControl } from '../control/useLugaresControl';
 import { Categoria, categorias } from '../model/local';
 import { TabScreenProps } from '../navigation/types';
+import { AREA_MINIMA_DE_TOQUE } from '../theme';
 
 const LugaresScreen = ({ navigation }: TabScreenProps<'Lugares'>) => {
   const { tema } = useTema();
   const controle = useLugaresControl();
   const { espacamento } = tema;
+  // Leva o que a pessoa já digitou para a busca no mapa.
+  const adicionarLugar = () =>
+    navigation.navigate('AdicionarLugar', { nome: controle.busca.trim() || undefined });
 
   const cabecalho = (
     <View style={{ gap: espacamento.md, paddingBottom: espacamento.sm }}>
@@ -50,9 +56,31 @@ const LugaresScreen = ({ navigation }: TabScreenProps<'Lugares'>) => {
         ))}
       </ScrollView>
       {!controle.carregando && !controle.erro && (
-        <Texto variante="legenda" secundario accessibilityLiveRegion="polite">
-          {controle.total === 1 ? '1 lugar encontrado' : `${controle.total} lugares encontrados`}
-        </Texto>
+        <View style={estilos.linha}>
+          <Texto
+            variante="legenda"
+            secundario
+            accessibilityLiveRegion="polite"
+            style={estilos.flex}
+          >
+            {controle.total === 1 ? '1 lugar encontrado' : `${controle.total} lugares encontrados`}
+          </Texto>
+          <Pressable
+            onPress={adicionarLugar}
+            accessibilityRole="button"
+            accessibilityLabel="Adicionar um lugar que não está no Sereno"
+            style={estilos.link}
+          >
+            <MaterialCommunityIcons
+              name="map-marker-plus-outline"
+              size={18}
+              color={tema.cores.primaria}
+            />
+            <Texto variante="legenda" negrito cor={tema.cores.primaria}>
+              Adicionar lugar
+            </Texto>
+          </Pressable>
+        </View>
       )}
     </View>
   );
@@ -65,7 +93,13 @@ const LugaresScreen = ({ navigation }: TabScreenProps<'Lugares'>) => {
     <EstadoVazio
       icone="map-search-outline"
       titulo="Nenhum lugar encontrado"
-      descricao="Tente outro nome ou tire o filtro de categoria."
+      descricao={
+        controle.busca.trim()
+          ? `"${controle.busca.trim()}" ainda não está no Sereno. Você pode buscá-lo no mapa e adicionar.`
+          : 'Tente outro nome ou tire o filtro de categoria.'
+      }
+      textoAcao={controle.busca.trim() ? 'Buscar no mapa e adicionar' : undefined}
+      onAcao={controle.busca.trim() ? adicionarLugar : undefined}
     />
   ) : (
     <EstadoVazio
@@ -116,6 +150,20 @@ const estilos = StyleSheet.create({
   lista: {
     flexGrow: 1,
     paddingBottom: 24,
+  },
+  linha: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  flex: {
+    flex: 1,
+  },
+  link: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    minHeight: AREA_MINIMA_DE_TOQUE,
+    paddingHorizontal: 4,
   },
   rodape: {
     padding: 16,

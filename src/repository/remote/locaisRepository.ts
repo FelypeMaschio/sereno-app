@@ -1,6 +1,7 @@
 import { AvaliacaoRequest, Avaliacao } from '../../model/avaliacao';
 import { Pagina } from '../../model/comum';
 import { Categoria, Insight, Local } from '../../model/local';
+import { LocalRequest } from '../../model/lugarMapa';
 import { apiJava } from './http';
 
 /** Lugares, avaliações e insight: API Java. */
@@ -36,6 +37,12 @@ export const listarLocais = async ({
 
 export const buscarLocal = async (id: number): Promise<Local> => {
   const { data } = await apiJava.get<Local>(`/locais/${id}`);
+  return data;
+};
+
+/** POST /api/locais: adiciona um lugar (escolhido do mapa) ao Sereno. */
+export const criarLocal = async (lugar: LocalRequest): Promise<Local> => {
+  const { data } = await apiJava.post<Local>('/locais', lugar);
   return data;
 };
 

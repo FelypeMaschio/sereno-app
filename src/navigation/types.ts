@@ -27,6 +27,8 @@ export type MainTabsParamList = {
 export type AppStackParamList = {
   MainTabs: NavigatorScreenParams<MainTabsParamList>;
   DetalheLugar: { localId: number };
+  /** nome = o que a pessoa buscou e não achou (já vem preenchido na busca do mapa). */
+  AdicionarLugar: { nome?: string };
   /** Sem avaliacaoId = nova avaliação; com avaliacaoId = edição. */
   FormAvaliacao: { localId: number; avaliacaoId?: number };
   DetalheEstacao: { estacaoId: number };
