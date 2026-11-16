@@ -31,6 +31,18 @@ export const loginSchema = object({
 });
 export type LoginForm = InferType<typeof loginSchema>;
 
+/**
+ * Regras da senha no cadastro, mostradas como checklist enquanto a pessoa digita.
+ * A API Java exige 8 a 72 caracteres com letras e números; o app pede também
+ * maiúscula e minúscula, deixando a senha mais forte (a API aceita do mesmo jeito).
+ */
+export const regrasSenha: { rotulo: string; teste: (senha: string) => boolean }[] = [
+  { rotulo: 'Pelo menos 8 caracteres', teste: (senha) => senha.length >= 8 },
+  { rotulo: 'Uma letra maiúscula', teste: (senha) => /[A-ZÀ-Ý]/.test(senha) },
+  { rotulo: 'Uma letra minúscula', teste: (senha) => /[a-zà-ÿ]/.test(senha) },
+  { rotulo: 'Um número', teste: (senha) => /\d/.test(senha) },
+];
+
 export const cadastroSchema = object({
   nome: string()
     .trim()
@@ -42,7 +54,9 @@ export const cadastroSchema = object({
     .required('Crie uma senha')
     .min(8, 'A senha precisa ter pelo menos 8 caracteres')
     .max(72, 'A senha pode ter até 72 caracteres')
-    .matches(/^(?=.*[A-Za-z])(?=.*\d).+$/, 'Use letras e números na senha'),
+    .test('regras', 'A senha ainda não atende a todas as regras', (senha = '') =>
+      regrasSenha.every(({ teste }) => teste(senha)),
+    ),
   confirmacao: string()
     .required('Repita a senha')
     .oneOf([ref('senha')], 'As senhas não são iguais'),

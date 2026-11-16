@@ -5,6 +5,7 @@ import CampoTexto from '../components/CampoTexto';
 import Cartao from '../components/Cartao';
 import HeroMarca from '../components/HeroMarca';
 import MensagemErro from '../components/MensagemErro';
+import RegrasSenha from '../components/RegrasSenha';
 import Texto from '../components/Texto';
 import { useTema } from '../context/TemaContext';
 import { useCadastroControl } from '../control/useCadastroControl';
@@ -48,11 +49,12 @@ const CadastroScreen = ({ navigation }: AuthScreenProps<'Cadastro'>) => {
             />
             <CampoTexto
               rotulo="Senha"
-              placeholder="8 caracteres ou mais, com letras e números"
+              placeholder="Crie uma senha"
               value={form.senha}
               onChangeText={(valor) => alterar('senha', valor)}
               erro={erros.senha}
-              secureTextEntry
+              senha
+              ajuda={<RegrasSenha senha={form.senha} confirmacao={form.confirmacao} />}
               autoComplete="new-password"
             />
             <CampoTexto
@@ -61,7 +63,7 @@ const CadastroScreen = ({ navigation }: AuthScreenProps<'Cadastro'>) => {
               value={form.confirmacao}
               onChangeText={(valor) => alterar('confirmacao', valor)}
               erro={erros.confirmacao}
-              secureTextEntry
+              senha
               autoComplete="new-password"
             />
             {erroGeral && Object.keys(erros).length === 0 && <MensagemErro mensagem={erroGeral} />}

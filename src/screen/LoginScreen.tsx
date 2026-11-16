@@ -43,7 +43,7 @@ const LoginScreen = ({ navigation }: AuthScreenProps<'Login'>) => {
               value={form.senha}
               onChangeText={(valor) => alterar('senha', valor)}
               erro={erros.senha}
-              secureTextEntry
+              senha
               autoComplete="password"
               textContentType="password"
               returnKeyType="go"
