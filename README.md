@@ -25,21 +25,21 @@ Global Solution FIAP 2026/2 · tema **CitizenTech** · área **Cidades** · ODS 
 
 ## Funcionalidades
 
-| #   | Tela                 | O que faz                                                                              | API                              |
-| --- | -------------------- | -------------------------------------------------------------------------------------- | -------------------------------- |
-| 1   | Login                | Entrar com e-mail e senha, com validação e mensagens de erro                           | Java `POST /api/auth/login`      |
-| 2   | Cadastro             | Criar conta (já entra no app)                                                          | Java `POST /api/auth/register`   |
-| 3   | Início               | "Pronto para ir?": destino + previsão + estação mais próxima; "Preciso de calma agora" | Java + .NET + IA                 |
-| 4   | Lugares              | Lista paginada com busca, filtro por categoria e índice de calma                       | Java `GET /api/locais`           |
-| 5   | Detalhe do lugar     | Índice, previsão por horário (IA), "o que as pessoas contam" (IA) e avaliações         | Java + IA                        |
-| 6   | Avaliação            | **CRUD**: criar, editar e excluir avaliação sensorial                                  | Java `/api/avaliacoes`           |
-| 7   | Estações             | Lista paginada com busca e filtro "só com equipamento parado"                          | .NET `GET /api/estacoes`         |
-| 8   | Detalhe da estação   | Equipamentos, status, "frescor" do status e "Quais são meus direitos?" (IA)            | .NET + IA                        |
-| 9   | Reporte              | **CRUD**: criar (com `Idempotency-Key`), editar e excluir reporte                      | .NET `/api/reportes`             |
-| 10  | Minhas contribuições | Avaliações e reportes da pessoa, com editar e excluir                                  | Java + .NET                      |
-| 12  | Adicionar lugar      | Busca no mapa aberto (OpenStreetMap/Photon) e cadastra só lugares reais, sem duplicar  | Photon + Java `POST /api/locais` |
-| 11  | Perfil (aba)         | Foto de perfil (só no aparelho), edição do nome, modo baixo estímulo e logout          | Java `/api/usuarios/me`          |
-| —   | Sobre o app          | Versão e **hash do commit** da build                                                   | —                                |
+| #   | Tela                 | O que faz                                                                                                                                                                   | API                              |
+| --- | -------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------- |
+| 1   | Login                | Entrar com e-mail e senha, com validação e mensagens de erro                                                                                                                | Java `POST /api/auth/login`      |
+| 2   | Cadastro             | Criar conta (já entra no app)                                                                                                                                               | Java `POST /api/auth/register`   |
+| 3   | Início               | Destino do Sereno ou do mapa → calma + previsão; estação de embarque (perto de você) e de desembarque (perto do destino) com cada elevador/escada; "Preciso de calma agora" | Java + .NET + IA + mapa          |
+| 4   | Lugares              | Lista paginada com busca, filtro por categoria e índice de calma                                                                                                            | Java `GET /api/locais`           |
+| 5   | Detalhe do lugar     | Índice, previsão por horário (IA), "o que as pessoas contam" (IA) e avaliações                                                                                              | Java + IA                        |
+| 6   | Avaliação            | **CRUD**: criar, editar e excluir avaliação sensorial                                                                                                                       | Java `/api/avaliacoes`           |
+| 7   | Estações             | Lista paginada com busca e filtro "só com equipamento parado"                                                                                                               | .NET `GET /api/estacoes`         |
+| 8   | Detalhe da estação   | Equipamentos, status, "frescor" do status e "Quais são meus direitos?" (IA)                                                                                                 | .NET + IA                        |
+| 9   | Reporte              | **CRUD**: criar (com `Idempotency-Key`), editar e excluir reporte                                                                                                           | .NET `/api/reportes`             |
+| 10  | Minhas contribuições | Avaliações e reportes da pessoa, com editar e excluir                                                                                                                       | Java + .NET                      |
+| 12  | Adicionar lugar      | Busca no mapa aberto (OpenStreetMap/Photon) e cadastra só lugares reais, sem duplicar                                                                                       | Photon + Java `POST /api/locais` |
+| 11  | Perfil (aba)         | Foto de perfil (só no aparelho), edição do nome, modo baixo estímulo e logout                                                                                               | Java `/api/usuarios/me`          |
+| —   | Sobre o app          | Versão e **hash do commit** da build                                                                                                                                        | —                                |
 
 ### Diferenciais
 

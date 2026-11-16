@@ -3,16 +3,16 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import Botao from '../components/Botao';
 import CampoBusca from '../components/CampoBusca';
 import Cartao from '../components/Cartao';
+import CartaoEstacaoCaminho from '../components/CartaoEstacaoCaminho';
 import CartaoPrevisao from '../components/CartaoPrevisao';
 import IndiceCalma from '../components/IndiceCalma';
-import ItemEstacao from '../components/ItemEstacao';
 import ItemLugar from '../components/ItemLugar';
 import MensagemErro from '../components/MensagemErro';
 import Tela from '../components/Tela';
 import Texto from '../components/Texto';
 import { useTema } from '../context/TemaContext';
 import { useInicioControl } from '../control/useInicioControl';
-import { rotuloCategoria } from '../model/local';
+import { categorias, rotuloCategoria } from '../model/local';
 import { TabScreenProps } from '../navigation/types';
 import { AREA_MINIMA_DE_TOQUE } from '../theme';
 import { formatarDistancia } from '../utils/distancia';
@@ -21,16 +21,75 @@ const InicioScreen = ({ navigation }: TabScreenProps<'Inicio'>) => {
   const { tema } = useTema();
   const { cores, espacamento } = tema;
   const controle = useInicioControl();
-  const { estadoLocalizacao: estado, escolhido } = controle;
+  const { estadoLocalizacao: estado, destino, caminho } = controle;
 
-  const avisoLocalizacao =
+  /** Por que não temos a localização, em linguagem simples (null = temos). */
+  const semLocalizacao =
     estado.tipo === 'negada'
-      ? 'Sem acesso à sua localização. Mostrando os lugares mais calmos no geral.'
+      ? 'Sem acesso à sua localização.'
       : estado.tipo === 'gpsDesligado'
-        ? 'A localização do celular está desligada. Mostrando os lugares mais calmos no geral.'
+        ? 'A localização do celular está desligada.'
         : estado.tipo === 'erro'
-          ? 'Não consegui descobrir onde você está. Mostrando os lugares mais calmos no geral.'
-          : null;
+          ? 'Não consegui descobrir onde você está.'
+          : estado.tipo === 'ocioso'
+            ? 'Você ainda não liberou a localização.'
+            : null;
+
+  /** Botão para liberar a localização (ou abrir as configurações, se foi bloqueada). */
+  const botaoLocalizacao =
+    estado.tipo === 'negada' && !estado.podePerguntarDeNovo ? (
+      <Botao
+        titulo="Abrir configurações"
+        icone="cog-outline"
+        variante="secundario"
+        dica="Abre as configurações do app para liberar a localização"
+        onPress={controle.abrirConfiguracoes}
+      />
+    ) : (
+      <Botao
+        titulo="Usar minha localização"
+        icone="crosshairs-gps"
+        variante="secundario"
+        dica="A localização fica só no celular e não é enviada para nenhum servidor"
+        onPress={controle.usarLocalizacao}
+      />
+    );
+
+  /** Linha de resultado da busca de destino (do Sereno ou do mapa). */
+  const resultado = (
+    chave: string,
+    titulo: string,
+    subtitulo: string,
+    icone: keyof typeof MaterialCommunityIcons.glyphMap,
+    onPress: () => void,
+  ) => (
+    <Pressable
+      key={chave}
+      onPress={onPress}
+      accessibilityRole="button"
+      accessibilityLabel={`Ir para ${titulo}, ${subtitulo}`}
+      style={({ pressed }) => [
+        estilos.resultado,
+        {
+          backgroundColor: cores.superficie,
+          borderColor: cores.borda,
+          borderRadius: tema.raios.medio,
+          paddingHorizontal: espacamento.md,
+          opacity: pressed ? 0.8 : 1,
+        },
+      ]}
+    >
+      <MaterialCommunityIcons name={icone} size={20} color={cores.primaria} />
+      <View style={estilos.flex}>
+        <Texto negrito numberOfLines={1}>
+          {titulo}
+        </Texto>
+        <Texto variante="legenda" secundario numberOfLines={1}>
+          {subtitulo}
+        </Texto>
+      </View>
+    </Pressable>
+  );
 
   return (
     <Tela>
@@ -53,12 +112,12 @@ const InicioScreen = ({ navigation }: TabScreenProps<'Inicio'>) => {
         </Texto>
       </View>
 
-      {/* Atalho para um momento difícil: um lugar calmo perto, com um toque. */}
+      {/* Atalho para um momento difícil: um lugar tranquilo perto, com um toque. */}
       <Pressable
         onPress={controle.pedirCalma}
         accessibilityRole="button"
         accessibilityLabel="Preciso de calma agora"
-        accessibilityHint="Mostra lugares calmos perto de você"
+        accessibilityHint="Mostra os lugares mais tranquilos perto de você"
         style={({ pressed }) => [
           estilos.calma,
           {
@@ -88,39 +147,28 @@ const InicioScreen = ({ navigation }: TabScreenProps<'Inicio'>) => {
           {controle.carregandoSugestoes ? (
             <View style={[estilos.linha, { gap: espacamento.sm }]}>
               <ActivityIndicator color={cores.primaria} />
-              <Texto secundario>Procurando um lugar calmo…</Texto>
+              <Texto secundario>Procurando um lugar tranquilo…</Texto>
             </View>
           ) : controle.erroSugestoes ? (
             <MensagemErro mensagem={controle.erroSugestoes} onTentarDeNovo={controle.pedirCalma} />
           ) : (
             <>
-              {avisoLocalizacao && (
-                <Cartao>
-                  <Texto variante="legenda">{avisoLocalizacao}</Texto>
-                  {estado.tipo === 'negada' && !estado.podePerguntarDeNovo ? (
-                    <Botao
-                      titulo="Abrir configurações"
-                      icone="cog-outline"
-                      variante="secundario"
-                      dica="Abre as configurações do app para liberar a localização"
-                      onPress={controle.abrirConfiguracoes}
-                    />
-                  ) : (
-                    <Botao
-                      titulo="Tentar de novo"
-                      icone="crosshairs-gps"
-                      variante="secundario"
-                      onPress={controle.pedirCalma}
-                    />
-                  )}
+              {semLocalizacao && (
+                <Cartao style={{ gap: espacamento.sm }}>
+                  <Texto variante="legenda">
+                    {semLocalizacao} Mostrando os lugares mais tranquilos no geral.
+                  </Texto>
+                  {botaoLocalizacao}
                 </Cartao>
               )}
-              {controle.sugestoes.length === 0 ? (
-                <Texto secundario>Ainda não há lugares calmos avaliados perto de você.</Texto>
-              ) : (
+              {controle.sugestoes.length > 0 && (
                 <>
                   <Texto negrito>
-                    {estado.tipo === 'ok' ? 'Calmos por perto' : 'Os mais calmos'}
+                    {controle.soModerados
+                      ? 'Ainda não há lugares avaliados como calmos. Estes são os mais tranquilos:'
+                      : estado.tipo === 'ok'
+                        ? 'Calmos mais perto de você'
+                        : 'Os mais calmos'}
                   </Texto>
                   {controle.sugestoes.map(({ local, distanciaKm }) => (
                     <ItemLugar
@@ -132,6 +180,20 @@ const InicioScreen = ({ navigation }: TabScreenProps<'Inicio'>) => {
                   ))}
                 </>
               )}
+              <Cartao style={{ gap: espacamento.sm }}>
+                <Texto variante="legenda">
+                  {controle.sugestoes.length === 0
+                    ? 'Ainda não há lugares tranquilos avaliados. '
+                    : ''}
+                  Conhece um lugar calmo que não está aqui? Adicione e ajude outras pessoas.
+                </Texto>
+                <Botao
+                  titulo="Adicionar lugar calmo"
+                  icone="map-marker-plus-outline"
+                  variante="secundario"
+                  onPress={() => navigation.navigate('AdicionarLugar', {})}
+                />
+              </Cartao>
             </>
           )}
         </View>
@@ -139,111 +201,200 @@ const InicioScreen = ({ navigation }: TabScreenProps<'Inicio'>) => {
 
       <Texto variante="subtitulo">Para onde você vai?</Texto>
 
-      {!escolhido ? (
+      {!destino ? (
         <View style={{ gap: espacamento.sm }}>
           <CampoBusca
             valor={controle.busca}
             onChange={controle.setBusca}
-            placeholder="Digite o nome do lugar"
+            placeholder="Ex.: Parque Ibirapuera, Shopping Aricanduva"
             rotuloAcessivel="Buscar o lugar para onde você vai"
           />
-          {controle.buscando && <ActivityIndicator color={cores.primaria} />}
-          {controle.erroBusca && <MensagemErro mensagem={controle.erroBusca} />}
-          {controle.resultados.map((local) => (
-            <Pressable
-              key={local.id}
-              onPress={() => controle.escolher(local)}
-              accessibilityRole="button"
-              accessibilityLabel={`Escolher ${local.nome}`}
-              style={({ pressed }) => [
-                estilos.resultado,
-                {
-                  backgroundColor: cores.superficie,
-                  borderColor: cores.borda,
-                  borderRadius: tema.raios.medio,
-                  paddingHorizontal: espacamento.md,
-                  opacity: pressed ? 0.8 : 1,
-                },
-              ]}
-            >
-              <MaterialCommunityIcons name="map-marker-outline" size={20} color={cores.primaria} />
-              <View style={estilos.flex}>
-                <Texto negrito numberOfLines={1}>
-                  {local.nome}
+          {controle.poucasLetras ? (
+            <Texto variante="legenda" secundario>
+              Busque um lugar do Sereno ou qualquer endereço do mapa.
+            </Texto>
+          ) : (
+            <>
+              {controle.erroBusca && <MensagemErro mensagem={controle.erroBusca} />}
+
+              {controle.resultadosSereno.length > 0 && (
+                <Texto variante="legenda" negrito secundario>
+                  No Sereno (com avaliações)
                 </Texto>
-                <Texto variante="legenda" secundario numberOfLines={1}>
-                  {rotuloCategoria(local.categoria)} · {local.endereco}
+              )}
+              {controle.resultadosSereno.map((local) =>
+                resultado(
+                  `s${local.id}`,
+                  local.nome,
+                  `${rotuloCategoria(local.categoria)} · ${local.endereco}`,
+                  categorias[local.categoria]?.icone ?? 'map-marker-outline',
+                  () => controle.escolherLocal(local),
+                ),
+              )}
+
+              {controle.resultadosMapa.length > 0 && (
+                <Texto variante="legenda" negrito secundario>
+                  No mapa
                 </Texto>
-              </View>
-            </Pressable>
-          ))}
-          {controle.busca.trim().length >= 2 &&
-            !controle.buscando &&
-            !controle.erroBusca &&
-            controle.resultados.length === 0 && (
-              <Texto secundario>Nenhum lugar com esse nome. Tente parte do nome.</Texto>
-            )}
+              )}
+              {controle.resultadosMapa.map((lugar) =>
+                resultado(
+                  `m${lugar.idMapa}`,
+                  lugar.nome,
+                  lugar.endereco,
+                  categorias[lugar.categoria].icone,
+                  () => controle.escolherDoMapa(lugar),
+                ),
+              )}
+
+              {controle.buscando && <ActivityIndicator color={cores.primaria} />}
+              {!controle.buscando &&
+                !controle.erroBusca &&
+                controle.resultadosSereno.length === 0 &&
+                controle.resultadosMapa.length === 0 && (
+                  <Texto secundario>
+                    {controle.erroMapa ??
+                      'Nenhum lugar encontrado. Tente acrescentar o bairro ou a cidade.'}
+                  </Texto>
+                )}
+              {controle.resultadosMapa.length > 0 && (
+                <Texto variante="legenda" secundario>
+                  Dados do mapa © colaboradores do OpenStreetMap
+                </Texto>
+              )}
+            </>
+          )}
         </View>
       ) : (
         <View style={{ gap: espacamento.md }}>
-          {/* 1. O destino: índice de calma */}
-          <Cartao>
+          {/* 1. O destino */}
+          <Cartao style={{ gap: espacamento.sm }}>
             <View style={[estilos.linha, { gap: espacamento.md }]}>
               <View style={estilos.flex}>
                 <Texto variante="legenda" secundario>
                   Destino
                 </Texto>
-                <Texto variante="subtitulo">{escolhido.nome}</Texto>
+                <Texto variante="subtitulo">{destino.nome}</Texto>
                 <Texto variante="legenda" secundario numberOfLines={2}>
-                  {escolhido.endereco}
+                  {destino.endereco}
                 </Texto>
               </View>
-              <IndiceCalma
-                indice={escolhido.indiceCalma}
-                tamanho="grande"
-                totalAvaliacoes={escolhido.totalAvaliacoes}
-              />
+              {destino.local && (
+                <IndiceCalma
+                  indice={destino.local.indiceCalma}
+                  tamanho="grande"
+                  totalAvaliacoes={destino.local.totalAvaliacoes}
+                />
+              )}
             </View>
+            {!destino.local && (
+              <Texto variante="legenda" secundario>
+                Este lugar ainda não está no Sereno, então não tem índice de calma. Adicione para
+                avaliar e ajudar outras pessoas.
+              </Texto>
+            )}
             <View style={[estilos.linha, { gap: espacamento.sm }]}>
               <View style={estilos.flex}>
-                <Botao
-                  titulo="Ver detalhes"
-                  variante="secundario"
-                  onPress={() => navigation.navigate('DetalheLugar', { localId: escolhido.id })}
-                />
+                {destino.local ? (
+                  <Botao
+                    titulo="Detalhes"
+                    variante="secundario"
+                    onPress={() =>
+                      navigation.navigate('DetalheLugar', { localId: destino.local!.id })
+                    }
+                  />
+                ) : (
+                  <Botao
+                    titulo="Adicionar"
+                    icone="map-marker-plus-outline"
+                    variante="secundario"
+                    onPress={() => navigation.navigate('AdicionarLugar', { nome: destino.nome })}
+                  />
+                )}
               </View>
               <View style={estilos.flex}>
                 <Botao
                   titulo="Trocar"
                   icone="swap-horizontal"
                   variante="secundario"
-                  onPress={controle.trocarLugar}
+                  onPress={controle.trocarDestino}
                 />
               </View>
             </View>
           </Cartao>
 
-          {/* 2. Quando ir: previsão da IA para o dia/hora escolhidos */}
-          <CartaoPrevisao localId={escolhido.id} />
+          {/* 2. Quando ir: previsão da IA (só para lugares do Sereno, que têm histórico) */}
+          {destino.local && <CartaoPrevisao localId={destino.local.id} />}
 
-          {/* 3. O caminho: estação mais próxima e seus equipamentos */}
-          <Texto variante="subtitulo">Estação mais próxima</Texto>
-          {controle.carregandoEstacao ? (
+          {/* 3. O caminho: estação de embarque e de desembarque, com cada equipamento */}
+          <Texto variante="subtitulo">Seu caminho de metrô e trem</Texto>
+          {controle.carregandoEstacoes ? (
             <ActivityIndicator color={cores.primaria} />
-          ) : controle.erroEstacao ? (
-            <MensagemErro mensagem={controle.erroEstacao} />
-          ) : controle.estacaoProxima ? (
-            <ItemEstacao
-              estacao={controle.estacaoProxima.estacao}
-              detalhe={`${formatarDistancia(controle.estacaoProxima.distanciaKm)} do destino`}
-              onPress={() =>
-                navigation.navigate('DetalheEstacao', {
-                  estacaoId: controle.estacaoProxima!.estacao.id,
-                })
-              }
-            />
-          ) : (
+          ) : controle.erroEstacoes ? (
+            <MensagemErro mensagem={controle.erroEstacoes} />
+          ) : !caminho?.desembarque ? (
             <Texto secundario>Não encontramos estações com localização cadastrada.</Texto>
+          ) : (
+            <>
+              {caminho.embarque ? (
+                caminho.mesmaEstacao ? (
+                  <Cartao>
+                    <Texto variante="legenda">
+                      A estação mais perto de você é a mesma do destino. Talvez dê para ir a pé.
+                    </Texto>
+                  </Cartao>
+                ) : (
+                  <CartaoEstacaoCaminho
+                    papel="Embarque"
+                    referencia="de você"
+                    noCaminho={caminho.embarque}
+                    equipamentos={controle.equipamentosDa(caminho.embarque.estacao.id)}
+                    onPress={() =>
+                      navigation.navigate('DetalheEstacao', {
+                        estacaoId: caminho.embarque!.estacao.id,
+                      })
+                    }
+                  />
+                )
+              ) : estado.tipo === 'carregando' ? (
+                <ActivityIndicator color={cores.primaria} />
+              ) : (
+                <Cartao style={{ gap: espacamento.sm }}>
+                  <Texto variante="legenda">
+                    {semLocalizacao} Libere a localização para ver também a estação de embarque
+                    perto de você.
+                  </Texto>
+                  {botaoLocalizacao}
+                </Cartao>
+              )}
+
+              {caminho.embarque && !caminho.mesmaEstacao && (
+                <View style={[estilos.linha, { gap: espacamento.sm }]}>
+                  <MaterialCommunityIcons
+                    name={caminho.linhasEmComum.length > 0 ? 'arrow-down' : 'swap-vertical'}
+                    size={20}
+                    color={cores.textoSecundario}
+                  />
+                  <Texto variante="legenda" secundario style={estilos.flex}>
+                    {caminho.linhasEmComum.length > 0
+                      ? `Mesma linha (${caminho.linhasEmComum.join(', ')}): dá para ir sem baldeação.`
+                      : 'Sem linha em comum: provavelmente vai ter baldeação. Confira o trajeto no app do Metrô ou da CPTM.'}
+                  </Texto>
+                </View>
+              )}
+
+              <CartaoEstacaoCaminho
+                papel="Desembarque"
+                referencia="do destino"
+                noCaminho={caminho.desembarque}
+                equipamentos={controle.equipamentosDa(caminho.desembarque.estacao.id)}
+                onPress={() =>
+                  navigation.navigate('DetalheEstacao', {
+                    estacaoId: caminho.desembarque!.estacao.id,
+                  })
+                }
+              />
+            </>
           )}
         </View>
       )}
