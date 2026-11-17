@@ -16,6 +16,12 @@ export type EstadoLocalizacao =
   | { tipo: 'gpsDesligado' }
   | { tipo: 'erro' };
 
+const LIMITE_LEITURA_MS = 8_000;
+
+/** Resolve com null se a promessa passar do tempo limite. */
+const comLimiteDeTempo = <T>(promessa: Promise<T>, ms: number): Promise<T | null> =>
+  Promise.race([promessa, new Promise<null>((resolve) => setTimeout(() => resolve(null), ms))]);
+
 /**
  * Localização sob demanda. A permissão só é pedida quando a pessoa toca no botão
  * (nunca ao abrir o app), como recomendam as guidelines da Apple e do Google.
@@ -36,10 +42,17 @@ export const useLocalizacao = () => {
           novo = { tipo: 'negada', podePerguntarDeNovo: canAskAgain };
         } else {
           // Primeiro a última posição conhecida (instantânea); se não houver, uma
-          // leitura nova com precisão "equilibrada", que basta para um raio de 1 km.
+          // leitura nova com precisão "equilibrada", que basta para distâncias em km.
+          // A leitura nova tem limite de tempo: com localização só aproximada, o Android
+          // pode demorar muito, e a pessoa não pode ficar esperando sem resposta.
           const posicao =
-            (await Location.getLastKnownPositionAsync({ maxAge: 10 * 60_000 })) ??
-            (await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.Balanced }));
+            (await Location.getLastKnownPositionAsync({ maxAge: 30 * 60_000 })) ??
+            (await comLimiteDeTempo(
+              Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.Balanced }),
+              LIMITE_LEITURA_MS,
+            )) ??
+            (await Location.getLastKnownPositionAsync());
+          if (!posicao) throw new Error('Sem posição');
           novo = {
             tipo: 'ok',
             coordenada: {

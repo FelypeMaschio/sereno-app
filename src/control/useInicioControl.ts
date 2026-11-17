@@ -169,7 +169,8 @@ export const useInicioControl = () => {
   const avaliados = useQuery({
     queryKey: [...chaves.locais, 'mais-calmos'],
     queryFn: () => listarLocais({ size: 50, sort: 'indiceCalma,desc' }),
-    enabled: pediuCalma,
+    // Busca já ao abrir a tela: quando a pessoa toca em "Preciso de calma agora",
+    // a lista já está pronta (no momento difícil, cada segundo de espera pesa).
     staleTime: 5 * 60_000,
   });
 
@@ -233,7 +234,10 @@ export const useInicioControl = () => {
     },
     sugestoes: calma.sugestoes,
     soModerados: calma.soModerados,
-    carregandoSugestoes: avaliados.isPending || estadoLocal.tipo === 'carregando',
+    // Mostra os lugares assim que a lista chega; a localização, se ainda estiver
+    // vindo, só reordena por distância depois.
+    carregandoSugestoes: avaliados.isPending,
+    procurandoLocalizacao: estadoLocal.tipo === 'carregando',
     erroSugestoes: mensagemDoErro(avaliados.error),
   };
 };

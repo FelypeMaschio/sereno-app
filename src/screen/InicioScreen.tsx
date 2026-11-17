@@ -153,6 +153,14 @@ const InicioScreen = ({ navigation }: TabScreenProps<'Inicio'>) => {
             <MensagemErro mensagem={controle.erroSugestoes} onTentarDeNovo={controle.pedirCalma} />
           ) : (
             <>
+              {controle.procurandoLocalizacao && (
+                <View style={[estilos.linha, { gap: espacamento.sm }]}>
+                  <ActivityIndicator color={cores.primaria} size="small" />
+                  <Texto variante="legenda" secundario>
+                    Procurando sua localização para ordenar pelos mais perto…
+                  </Texto>
+                </View>
+              )}
               {semLocalizacao && (
                 <Cartao style={{ gap: espacamento.sm }}>
                   <Texto variante="legenda">
