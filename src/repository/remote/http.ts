@@ -88,8 +88,12 @@ export const converterErro = (erro: unknown): ErroApp => {
   // As mensagens das APIs do grupo já vêm em português; usamos a nossa só se faltar.
   // No 401 e no 5xx preferimos a nossa, que é mais acolhedora que a técnica.
   const usarMensagemDaApi = corpo?.mensagem && status !== 401 && (status ?? 0) < 500;
-  const mensagem =
-    status === 429 && aguardar
+  // No login, 401 não é "sessão expirada": é e-mail ou senha que não conferem.
+  // A mensagem não diz qual dos dois errou, para não revelar quais e-mails têm conta.
+  const tentativaDeLogin = status === 401 && axiosErro.config?.url?.startsWith('/auth/');
+  const mensagem = tentativaDeLogin
+    ? 'E-mail ou senha incorretos. Confira e tente de novo.'
+    : status === 429 && aguardar
       ? `Muitos envios seguidos. Aguarde ${aguardar} segundos e tente de novo.`
       : usarMensagemDaApi
         ? corpo.mensagem
