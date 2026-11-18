@@ -33,7 +33,9 @@ const EscalaSensorial = ({
   const { cores } = tema;
 
   const escolher = (nivel: number) => {
-    if (tema.animacoes) Vibration.vibrate(15);
+    // 40 ms: curto o bastante para não incomodar, longo o bastante para ser sentido
+    // (toques de 15 ms quase não são percebidos em muitos celulares Android).
+    if (tema.animacoes) Vibration.vibrate(40);
     onChange(nivel);
   };
 
