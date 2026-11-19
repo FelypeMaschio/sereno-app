@@ -97,7 +97,7 @@ export const useInicioControl = () => {
 
   const doMapa = useQuery({
     queryKey: ['mapa', buscaAtrasada, minhaPosicao?.latitude, minhaPosicao?.longitude],
-    queryFn: ({ signal }) => buscarNoMapa(buscaAtrasada, minhaPosicao, signal),
+    queryFn: ({ signal }) => buscarNoMapa(buscaAtrasada, minhaPosicao, signal, true),
     enabled: buscaAtrasada.length >= 3 && !destino,
     staleTime: 5 * 60_000,
     retry: 1,

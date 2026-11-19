@@ -1,7 +1,8 @@
 import { create } from 'axios';
+import * as Location from 'expo-location';
 import { ErroApp } from '../../model/comum';
 import { categoriaDoMapa, LugarMapa } from '../../model/lugarMapa';
-import { Coordenada } from '../../utils/distancia';
+import { Coordenada, temCoordenadas } from '../../utils/distancia';
 
 /**
  * Busca de lugares reais no mapa aberto (OpenStreetMap), pelo serviço Photon.
@@ -14,7 +15,16 @@ import { Coordenada } from '../../utils/distancia';
  * Este cliente NÃO usa os interceptors das APIs do grupo: o token JWT do Sereno
  * nunca é enviado para um serviço de fora.
  */
-const apiMapa = create({ baseURL: 'https://photon.komoot.io', timeout: 10_000 });
+const apiMapa = create({
+  baseURL: 'https://photon.komoot.io',
+  timeout: 10_000,
+  // O serviço gratuito bloqueia (erro 403) pedidos com identificação genérica, como o
+  // "okhttp" que o Android usa por padrão. Por isso o app se identifica pelo nome,
+  // como pede a política de uso justo dos serviços do OpenStreetMap.
+  headers: {
+    'User-Agent': 'Sereno/1.0 (app academico FIAP GS 2026; github.com/FelypeMaschio/sereno-app)',
+  },
+});
 
 // Sem localização, a busca dá preferência a São Paulo (onde o Sereno começa).
 const SAO_PAULO: Coordenada = { latitude: -23.5505, longitude: -46.6333 };
@@ -55,10 +65,53 @@ const montarEndereco = ({ properties: p }: FeaturePhoton) => {
   return [texto, p.state].filter(Boolean).join(' - ') || (p.name ?? '');
 };
 
+/** "pinacoteca do estado" → "Pinacoteca Do Estado" (o nome que a pessoa digitou). */
+const comIniciaisMaiusculas = (texto: string) =>
+  texto
+    .trim()
+    .replace(/(^|\s)(\S)/g, (_, espaco: string, letra: string) => espaco + letra.toUpperCase());
+
+/**
+ * Plano B: o geocodificador do próprio celular (Android/Google), sem chave de API.
+ * Só acha a posição do endereço, não uma lista de estabelecimentos; por isso serve
+ * só para escolher DESTINO, nunca para cadastrar lugar novo (isso exige o mapa).
+ * No Android ele só funciona com a localização liberada.
+ */
+const buscarPeloCelular = async (texto: string): Promise<LugarMapa[]> => {
+  const { granted } = await Location.getForegroundPermissionsAsync();
+  if (!granted) return [];
+  const pontos = (await Location.geocodeAsync(texto)).filter(temCoordenadas).slice(0, 3);
+  return Promise.all(
+    pontos.map(async ({ latitude, longitude }) => {
+      const [endereco] = await Location.reverseGeocodeAsync({ latitude, longitude }).catch(
+        () => [],
+      );
+      const rua = [endereco?.street, endereco?.streetNumber].filter(Boolean).join(', ');
+      const regiao = [endereco?.district, endereco?.city ?? endereco?.subregion]
+        .filter(Boolean)
+        .join(', ');
+      return {
+        idMapa: `gps-${latitude.toFixed(5)},${longitude.toFixed(5)}`,
+        nome: comIniciaisMaiusculas(texto).slice(0, 120),
+        endereco: ([rua, regiao, endereco?.region].filter(Boolean).join(' - ') || texto).slice(
+          0,
+          255,
+        ),
+        latitude,
+        longitude,
+        categoria: 'OUTRO' as const,
+        tipoMapa: 'endereco',
+      };
+    }),
+  );
+};
+
 export const buscarNoMapa = async (
   texto: string,
   perto: Coordenada | null,
   signal?: AbortSignal,
+  /** true na busca de destino: se o mapa falhar, tenta o geocodificador do celular. */
+  permitirPlanoB = false,
 ): Promise<LugarMapa[]> => {
   const centro = perto ?? SAO_PAULO;
   try {
@@ -86,8 +139,14 @@ export const buscarNoMapa = async (
       }));
   } catch (erro) {
     if ((erro as { name?: string })?.name === 'CanceledError') throw erro;
+    if (permitirPlanoB) {
+      const pelocelular = await buscarPeloCelular(texto).catch(() => []);
+      if (pelocelular.length > 0) return pelocelular;
+    }
     throw new ErroApp(
-      'Não conseguimos buscar no mapa agora. Verifique a internet e tente de novo.',
+      permitirPlanoB
+        ? 'O serviço de mapa não respondeu. Libere a localização para buscar pelo celular, ou tente de novo em instantes.'
+        : 'O serviço de mapa não respondeu agora. Tente de novo em instantes.',
       null,
     );
   }
