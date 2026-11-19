@@ -11,7 +11,9 @@ Global Solution FIAP 2026/2 · tema **CitizenTech** · área **Cidades** · ODS 
 
 ## Vídeo de demonstração
 
-▶️ <LINK DO YOUTUBE>
+▶️ [Assistir à demonstração no YouTube](https://youtu.be/Nl5kd0eG4fc)
+
+O APK publicado no Firebase App Distribution foi gerado do commit `b646566` (o mesmo hash aparece em **Perfil → Sobre o app**). O commit seguinte só adiciona este link do vídeo ao README.
 
 ## Integrantes (2TDSPI)
 
